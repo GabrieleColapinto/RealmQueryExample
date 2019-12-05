@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">RealmQueryTest</string>
+    <string name="strQuery">Query</string>
 </resources>
