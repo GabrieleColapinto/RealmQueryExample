@@ -1,0 +1,99 @@
+package com.example.realmquerytest;
+
+import androidx.appcompat.app.AppCompatActivity;
+import io.realm.ObjectServerError;
+import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
+import io.realm.SyncConfiguration;
+import io.realm.SyncCredentials;
+import io.realm.SyncUser;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import static android.view.View.*;
+import static com.example.realmquerytest.MyApplication.*;
+
+public class MainActivity extends AppCompatActivity {
+
+    TextView txtQuery;
+    Button btnQuery;
+
+    //Authentication variables
+    Realm realm;
+    SyncConfiguration config;
+
+    RealmResults<Esempio1> results;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        txtQuery = findViewById(R.id.txtQuery);
+        btnQuery = findViewById(R.id.btnQuery);
+
+        realm.init(this);
+
+        btnQuery.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                runQuery();
+            }
+        });
+
+        //Login
+        SyncCredentials credentials = SyncCredentials.usernamePassword(username, password, createUser);
+        SyncUser.logInAsync(credentials, AUTH_URL, new SyncUser.Callback<SyncUser>() {
+            @Override
+            public void onSuccess(SyncUser user) {
+
+                // Create the configuration
+                user = SyncUser.current();
+                //String url = REALM_URL;
+                config = user.createConfiguration(REALM_URL).fullSynchronization().build();
+
+                // Open the remote Realm
+                realm = Realm.getInstance(config);
+
+                //I set the default configuration so that i can retrieve it in other classes
+                Realm.setDefaultConfiguration(config);
+
+                //This log instruction is useful to debug
+                Log.i("Login status: ", "Successful");
+            }
+            @Override
+            public void onError(ObjectServerError error) {
+                Log.e("Login error - ", error.toString());
+            }
+        });
+
+    }
+
+    private void runQuery() {
+        //I run the query to display the content of the table Esempio1
+        try {
+
+            //I refer to the class
+            RealmQuery<Esempio1> query = realm.where(Esempio1.class);
+            //Execute the query
+            results = query.findAllAsync();
+
+
+            // Transaction was a success.
+            txtQuery.setText("");
+            for (Esempio1 result : results) {
+                txtQuery.setText(txtQuery.getText() + "\n" + result.toString());
+                // Find a way to append the strings
+            }
+
+        } catch (Exception e) {
+            Log.e("Query error: ", e.getMessage());
+        }
+    }
+}
