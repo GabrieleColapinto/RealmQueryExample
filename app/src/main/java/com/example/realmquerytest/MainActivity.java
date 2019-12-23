@@ -7,6 +7,7 @@ import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.SyncConfiguration;
 import io.realm.SyncCredentials;
+import io.realm.SyncManager;
 import io.realm.SyncUser;
 
 import android.os.Bundle;
@@ -15,6 +16,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.example.realmquerytest.model.Esercizio;
+import com.example.realmquerytest.model.Materia;
+import com.example.realmquerytest.model.Voto;
+
+import java.util.Map;
 
 import static android.view.View.*;
 import static com.example.realmquerytest.MyApplication.*;
@@ -28,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     Realm realm;
     SyncConfiguration config;
 
-    RealmResults<Esempio1> results;
+    RealmResults<Voto> results;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,31 +54,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Se un utente è già loggato si riceve un errore se si prova ad accedere di nuovo
+        for(Map.Entry<String,SyncUser> user: SyncUser.all().entrySet()){
+            user.getValue().logOut();
+        }
+        //SyncUser.current().logOut();
+        //SyncManager.getUserStore().getCurrent().logOut();
+
+
         //Login
-        SyncCredentials credentials = SyncCredentials.usernamePassword(username, password, createUser);
-        SyncUser.logInAsync(credentials, AUTH_URL, new SyncUser.Callback<SyncUser>() {
-            @Override
-            public void onSuccess(SyncUser user) {
+            SyncCredentials credentials = SyncCredentials.usernamePassword(username, password, createUser);
+            SyncUser.logInAsync(credentials, AUTH_URL, new SyncUser.Callback<SyncUser>() {
+                @Override
+                public void onSuccess(SyncUser user) {
 
-                // Create the configuration
-                user = SyncUser.current();
-                //String url = REALM_URL;
-                config = user.createConfiguration(REALM_URL).fullSynchronization().build();
+                    // Create the configuration
+                    user = SyncUser.current();
+                    //String url = REALM_URL;
+                    config = user.createConfiguration(REALM_URL).fullSynchronization().build();
 
-                // Open the remote Realm
-                realm = Realm.getInstance(config);
+                    // Open the remote Realm
+                    realm = Realm.getInstance(config);
 
-                //I set the default configuration so that i can retrieve it in other classes
-                Realm.setDefaultConfiguration(config);
+                    //I set the default configuration so that i can retrieve it in other classes
+                    Realm.setDefaultConfiguration(config);
 
-                //This log instruction is useful to debug
-                Log.i("Login status: ", "Successful");
-            }
-            @Override
-            public void onError(ObjectServerError error) {
-                Log.e("Login error - ", error.toString());
-            }
-        });
+                    //This log instruction is useful to debug
+                    Log.i("Login status: ", "Successful");
+                }
+
+                @Override
+                public void onError(ObjectServerError error) {
+                    Log.e("Login error - ", error.toString());
+                }
+            });
 
     }
 
@@ -80,14 +96,14 @@ public class MainActivity extends AppCompatActivity {
         try {
 
             //I refer to the class
-            RealmQuery<Esempio1> query = realm.where(Esempio1.class);
+            RealmQuery<Voto> query = realm.where(Voto.class);
             //Execute the query
             results = query.findAllAsync();
 
 
             // Transaction was a success.
             txtQuery.setText("");
-            for (Esempio1 result : results) {
+            for (Voto result : results) {
                 txtQuery.setText(txtQuery.getText() + "\n" + result.toString());
                 // Find a way to append the strings
             }
@@ -97,3 +113,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+

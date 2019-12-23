@@ -15,9 +15,9 @@ public class MyApplication extends Application {
     Realm realm;
     SyncConfiguration config;
 
-    private static final String INSTANCE_ADDRESS = "exercisesdb.us1a.cloud.realm.io";
+    public static final String INSTANCE_ADDRESS = "exerciseexchange.us1.cloud.realm.io";
     public static final String AUTH_URL = "https://" + INSTANCE_ADDRESS + "/auth";
-    public static final String REALM_URL = "realms://" + INSTANCE_ADDRESS + "/ProgettoS3_v1";
+    public static final String REALM_URL = "realms://" + INSTANCE_ADDRESS + "/Exercise_Exchange_2";
     public static final String username = "Gabriele";
     public static final String password = "password";
     public static final boolean createUser = false;
